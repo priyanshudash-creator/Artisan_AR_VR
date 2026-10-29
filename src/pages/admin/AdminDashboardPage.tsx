@@ -192,10 +192,10 @@ export const AdminDashboardPage: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="flex flex-col md:flex-row gap-6 lg:gap-8 items-start">
           
           {/* Admin Sidebar */}
-          <aside className="lg:col-span-3 bg-white border border-[#E5DED3] rounded-2xl p-4 shadow-xs sticky top-28">
+          <aside className="w-full md:w-64 lg:w-72 shrink-0 bg-white border border-[#E5DED3] rounded-2xl p-4 shadow-xs sticky top-24">
             <div className="pb-3 border-b border-[#E5DED3] mb-3">
               <span className="text-[11px] font-bold uppercase tracking-wider text-[#6B6A63]">
                 Admin Navigation
@@ -238,7 +238,7 @@ export const AdminDashboardPage: React.FC = () => {
           </aside>
 
           {/* Main Admin Content */}
-          <main className="lg:col-span-9 space-y-6">
+          <main className="flex-1 min-w-0 w-full space-y-6">
             
             {/* 1. OVERVIEW VIEW */}
             {subView === 'overview' && (

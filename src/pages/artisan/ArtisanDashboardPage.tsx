@@ -24,7 +24,8 @@ import {
   Image as ImageIcon,
   Star,
   X,
-  Sparkles
+  Sparkles,
+  LogOut
 } from 'lucide-react'
 import { MOCK_PRODUCTS, MOCK_ARTISANS, MOCK_ORDERS, CRAFT_CATEGORIES } from '../../data/mockData'
 import { Product, VerificationStatus, CraftCategory } from '../../types'
@@ -252,15 +253,27 @@ export const ArtisanDashboardPage: React.FC = () => {
             >
               Public Marketplace
             </Link>
+            <button
+              onClick={() => {
+                localStorage.removeItem('artisan_studio_session')
+                showToast('Signed out of Artisan Studio.')
+                navigate('/artisan/login')
+              }}
+              className="px-3 py-1.5 rounded-lg border border-white/20 text-[#E8DCCB] hover:text-white hover:bg-white/10 flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Sign out of Artisan Studio"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Sign Out</span>
+            </button>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="flex flex-col md:flex-row gap-6 lg:gap-8 items-start">
           
-          {/* Sidebar Navigation */}
-          <aside className="lg:col-span-3 bg-white border border-[#E5DED3] rounded-2xl p-4 shadow-xs sticky top-28">
+          {/* Sidebar Navigation - Always on Left */}
+          <aside className="w-full md:w-64 lg:w-72 shrink-0 bg-white border border-[#E5DED3] rounded-2xl p-4 shadow-xs sticky top-24">
             <div className="pb-3 border-b border-[#E5DED3] mb-3">
               <span className="text-[11px] font-bold uppercase tracking-wider text-[#6B6A63]">
                 Artisan Studio Navigation
@@ -294,7 +307,7 @@ export const ArtisanDashboardPage: React.FC = () => {
           </aside>
 
           {/* Main Content Area */}
-          <main className="lg:col-span-9 space-y-6">
+          <main className="flex-1 min-w-0 w-full space-y-6">
             
             {/* 1. OVERVIEW VIEW */}
             {subView === 'overview' && (

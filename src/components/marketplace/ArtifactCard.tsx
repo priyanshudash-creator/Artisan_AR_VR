@@ -56,9 +56,9 @@ export const ArtifactCard: React.FC<ArtifactCardProps> = ({ artifact, onSelect, 
   return (
     <div 
       onClick={() => onSelect(artifact)}
-      className="group bg-white rounded-2xl border border-[#E5DED3] overflow-hidden hover:shadow-xl hover:border-[#B85C38]/40 transition-all duration-300 flex flex-col justify-between cursor-pointer"
+      className="group bg-white rounded-2xl border border-[#E5DED3] overflow-hidden hover:shadow-xl hover:border-[#B85C38]/40 transition-all duration-300 flex flex-col justify-between cursor-pointer h-full"
     >
-      <div>
+      <div className="flex flex-col flex-1">
         {/* Image Container with Badges */}
         <div className="relative aspect-4/3 overflow-hidden bg-[#FAF8F5]">
           <img
@@ -131,53 +131,58 @@ export const ArtifactCard: React.FC<ArtifactCardProps> = ({ artifact, onSelect, 
           )}
         </div>
 
-        {/* Card Body */}
-        <div className="p-4 sm:p-5">
-          {/* Artisan Verification Status */}
-          <div className="mb-2">
-            {artifact.localArtisans ? (
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-                  Verified: {artifact.localArtisans.split('(')[0].trim()}
-                </span>
-                {artifact.localArtisansOdia && (
-                  <span className="text-[11px] text-[#78816A] font-serif font-medium">
-                    ({artifact.localArtisansOdia.split(',')[0].trim()})
+        {/* Card Body with strict consistent vertical alignment */}
+        <div className="p-4 sm:p-5 flex flex-col flex-1 justify-between">
+          <div>
+            {/* Artisan Verification Status (Fixed 1-line height) */}
+            <div className="h-6 flex items-center overflow-hidden mb-2">
+              {artifact.localArtisans ? (
+                <div className="flex items-center gap-1.5 min-w-0 max-w-full">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                    Verified: {artifact.localArtisans.split('(')[0].trim()}
                   </span>
-                )}
-              </div>
-            ) : artifact.masterArtisans ? (
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-sky-50 text-sky-800 border border-sky-200">
-                  <Sparkles className="w-2.5 h-2.5 text-sky-600" />
-                  Master: {artifact.masterArtisans.split('(')[0].trim()}
-                </span>
-                {artifact.masterArtisansOdia && (
-                  <span className="text-[11px] text-[#78816A] font-serif font-medium">
-                    ({artifact.masterArtisansOdia.split(',')[0].trim()})
+                  {artifact.localArtisansOdia && (
+                    <span className="text-[11px] text-[#78816A] font-serif font-medium truncate">
+                      ({artifact.localArtisansOdia.split(',')[0].trim()})
+                    </span>
+                  )}
+                </div>
+              ) : artifact.masterArtisans ? (
+                <div className="flex items-center gap-1.5 min-w-0 max-w-full">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-sky-50 text-sky-800 border border-sky-200 shrink-0">
+                    <Sparkles className="w-2.5 h-2.5 text-sky-600" />
+                    Master: {artifact.masterArtisans.split('(')[0].trim()}
                   </span>
-                )}
-              </div>
-            ) : (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-amber-50/80 text-amber-800 border border-amber-200/80">
-                Artisan profile coming soon (Field survey)
-              </span>
-            )}
+                  {artifact.masterArtisansOdia && (
+                    <span className="text-[11px] text-[#78816A] font-serif font-medium truncate">
+                      ({artifact.masterArtisansOdia.split(',')[0].trim()})
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-amber-50/80 text-amber-800 border border-amber-200/80 truncate">
+                  Artisan profile coming soon (Field survey)
+                </span>
+              )}
+            </div>
+
+            {/* Artifact Title (Strict 1-line fixed height) */}
+            <h3 
+              className="font-serif text-base sm:text-lg font-bold text-[#244C3A] group-hover:text-[#B85C38] transition-colors truncate h-7 flex items-center mb-1" 
+              title={artifact.name}
+            >
+              {artifact.name}
+            </h3>
+
+            {/* What makes it special snippet (Fixed 2-line height) */}
+            <p className="text-xs text-[#6B6A63] line-clamp-2 leading-relaxed h-9 overflow-hidden mb-3">
+              {artifact.specialNotes || artifact.history}
+            </p>
           </div>
 
-          {/* Artifact Title */}
-          <h3 className="font-serif text-base sm:text-lg font-bold text-[#244C3A] group-hover:text-[#B85C38] transition-colors line-clamp-1">
-            {artifact.name}
-          </h3>
-
-          {/* What makes it special snippet */}
-          <p className="text-xs text-[#6B6A63] line-clamp-2 mt-1.5 leading-relaxed">
-            {artifact.specialNotes || artifact.history}
-          </p>
-
-          {/* Price Range & Confidence Level */}
-          <div className="mt-3 pt-3 border-t border-[#E5DED3]/70 flex items-center justify-between gap-2">
+          {/* Price Range & Confidence Level (Consistent baseline alignment) */}
+          <div className="pt-3 border-t border-[#E5DED3]/70 flex items-center justify-between gap-2 h-14">
             <div>
               <span className="text-[10px] uppercase tracking-wider text-[#78816A] font-semibold block">
                 Price Range ({artifact.priceUnit})
@@ -196,7 +201,7 @@ export const ArtifactCard: React.FC<ArtifactCardProps> = ({ artifact, onSelect, 
 
             {/* Price Confidence Badge */}
             <div 
-              className={`px-2 py-1 rounded-md text-[10px] font-semibold border flex items-center gap-1 cursor-help ${confidence.bg}`}
+              className={`px-2 py-1 rounded-md text-[10px] font-semibold border flex items-center gap-1 cursor-help shrink-0 ${confidence.bg}`}
               title={confidence.tooltip}
             >
               <span className={`w-1.5 h-1.5 rounded-full ${confidence.dot}`} />
@@ -207,7 +212,7 @@ export const ArtifactCard: React.FC<ArtifactCardProps> = ({ artifact, onSelect, 
       </div>
 
       {/* Card Footer Actions */}
-      <div className="px-4 sm:px-5 pb-4 pt-2 border-t border-[#E5DED3]/70 flex items-center justify-between gap-2">
+      <div className="px-4 sm:px-5 pb-4 pt-2 border-t border-[#E5DED3]/70 flex items-center justify-between gap-2 h-14">
         <button
           onClick={(e) => {
             e.stopPropagation()

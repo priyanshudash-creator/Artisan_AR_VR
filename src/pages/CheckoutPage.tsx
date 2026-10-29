@@ -12,20 +12,24 @@ import {
 } from 'lucide-react'
 import { useCartWishlist } from '../context/CartWishlistContext'
 
+import { getUserSession } from '../utils/userAuth'
+
 export const CheckoutPage: React.FC = () => {
   const navigate = useNavigate()
   const { cart, cartSubtotal, cartShipping, cartTotal, clearCart } = useCartWishlist()
 
-  // Form State
+  const user = getUserSession()
+
+  // Form State — populated from logged-in user or empty for user entry
   const [formData, setFormData] = useState({
-    fullName: 'Aarav Sharma',
-    email: 'aarav.sharma@example.com',
-    phone: '+91 98200 12345',
-    street: 'Plot 402, Saheed Nagar, Near Durga Mandap',
-    city: 'Bhubaneswar',
-    district: 'Khordha',
-    state: 'Odisha',
-    postalCode: '751007',
+    fullName: user?.fullName || '',
+    email: user?.email || '',
+    phone: user?.phone || '',
+    street: user?.street || '',
+    city: user?.city || '',
+    district: user?.district || '',
+    state: user?.state || 'Odisha',
+    postalCode: user?.postalCode || '',
     paymentMethod: 'upi-demo'
   })
 

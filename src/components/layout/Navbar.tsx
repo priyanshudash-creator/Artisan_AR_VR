@@ -18,13 +18,35 @@ import {
   ExternalLink
 } from 'lucide-react'
 import { useCartWishlist } from '../../context/CartWishlistContext'
+import { useShilpa } from '../../context/ShilpaContext'
 import { MOCK_PRODUCTS } from '../../data/mockData'
 import logoImg from '../../assets/logo.jpg'
+import { getUserSession, getInitials, UserProfile } from '../../utils/userAuth'
 
 export const Navbar: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { cartCount, wishlistCount, compareCount } = useCartWishlist()
+  const { openShilpa } = useShilpa()
+
+  const [user, setUser] = useState<UserProfile | null>(() => getUserSession())
+
+  React.useEffect(() => {
+    const handleAuthChange = () => {
+      setUser(getUserSession())
+    }
+    window.addEventListener('shilpa_auth_change', handleAuthChange)
+    return () => window.removeEventListener('shilpa_auth_change', handleAuthChange)
+  }, [])
+
+  // Strictly identify if viewing admin or artisan portal routes
+  const isPortalRoute = Boolean(
+    location.pathname.startsWith('/admin') ||
+    location.pathname.startsWith('/artisan')
+  )
+
+  // Only display cart/wishlist numbers when an actual patron user is signed in and not inside admin/artisan portal routes
+  const isPatronUser = Boolean(user && user.isLoggedIn && !isPortalRoute)
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [searchModalOpen, setSearchModalOpen] = useState(false)
@@ -59,30 +81,42 @@ export const Navbar: React.FC = () => {
           <Link
             to="/"
             className="flex items-center gap-2.5 sm:gap-3 group py-1"
-            aria-label="ArtisanAR/VR — Gaon to Growth Homepage"
+            aria-label="SHILPA SETU — Odisha Craft Heritage"
           >
             <img
               src={logoImg}
-              alt="ArtisanAR/VR Konark Wheel Logo"
+              alt="SHILPA SETU Konark Wheel Logo"
               className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover shadow-xs border border-[#B85C38]/30 group-hover:rotate-12 transition-transform duration-300"
             />
             <div className="flex flex-col">
               <div className="flex items-baseline tracking-tight">
                 <span className="font-serif text-2xl sm:text-3xl font-bold text-[#244C3A] tracking-tight group-hover:opacity-90 transition-opacity">
-                  Artisan
+                  SHILPA
                 </span>
-                <span className="font-sans text-2xl sm:text-3xl font-bold text-[#B85C38] ml-0.5 tracking-tight">
-                  AR/VR
+                <span className="font-serif text-2xl sm:text-3xl font-bold text-[#B85C38] ml-1.5 tracking-tight">
+                  SETU
                 </span>
               </div>
-              <span className="text-[9px] sm:text-[10px] font-semibold tracking-[0.28em] text-[#6B6A63] uppercase -mt-0.5 group-hover:text-[#252722] transition-colors">
-                GAON TO GROWTH
+              <span className="text-[9px] sm:text-[10px] font-semibold tracking-[0.25em] text-[#6B6A63] uppercase -mt-0.5 group-hover:text-[#252722] transition-colors">
+                ODISHA CRAFTS & HERITAGE
               </span>
             </div>
           </Link>
 
           {/* Utility Controls & CTA (Right Side) */}
-          <div className="flex items-center gap-2 sm:gap-4 lg:gap-5">
+          <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
+            {/* Ask SHILPA AI Craft Guide Button */}
+            <button
+              onClick={() => openShilpa()}
+              className="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#B85C38]/60 bg-[#FAF8F5] hover:bg-[#B85C38] hover:text-white text-[#244C3A] text-xs font-semibold shadow-2xs transition-all group shrink-0"
+              title="Consult SHILPA (AI Craft Guide)"
+            >
+              <div className="w-5 h-5 rounded-full overflow-hidden border border-[#B85C38]/40 shrink-0">
+                <img src={logoImg} alt="SHILPA" className="w-full h-full object-cover" />
+              </div>
+              <span>Ask SHILPA</span>
+              <Sparkles className="w-3.5 h-3.5 text-[#B85C38] group-hover:text-white" />
+            </button>
             {/* Search Icon */}
             <button
               onClick={() => setSearchModalOpen(true)}
@@ -94,13 +128,13 @@ export const Navbar: React.FC = () => {
 
             {/* Wishlist Heart Icon */}
             <Link
-              to="/account/wishlist"
+              to={isPatronUser ? "/account/wishlist" : "/login?redirect=/account/wishlist"}
               className="p-2 text-[#252722] hover:text-[#B85C38] transition-colors rounded-full hover:bg-[#E5DED3]/40 relative"
               aria-label={`Wishlist with ${wishlistCount} items`}
             >
               <Heart className="w-5 h-5 stroke-[1.8]" />
-              {wishlistCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-[#B85C38] text-white text-[10px] font-semibold rounded-full flex items-center justify-center">
+              {isPatronUser && wishlistCount > 0 && (
+                <span className="absolute top-1 right-1 w-4 h-4 bg-[#B85C38] text-white text-[10px] font-semibold rounded-full flex items-center justify-center animate-scale-in">
                   {wishlistCount}
                 </span>
               )}
@@ -108,26 +142,44 @@ export const Navbar: React.FC = () => {
 
             {/* Shopping Cart Icon */}
             <Link
-              to="/cart"
+              to={isPatronUser ? "/cart" : "/login?redirect=/cart"}
               className="p-2 text-[#252722] hover:text-[#B85C38] transition-colors rounded-full hover:bg-[#E5DED3]/40 relative"
               aria-label={`Shopping cart with ${cartCount} items`}
             >
               <ShoppingCart className="w-5 h-5 stroke-[1.8]" />
-              {cartCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-[#244C3A] text-white text-[10px] font-semibold rounded-full flex items-center justify-center">
+              {isPatronUser && cartCount > 0 && (
+                <span className="absolute top-1 right-1 w-4 h-4 bg-[#244C3A] text-white text-[10px] font-semibold rounded-full flex items-center justify-center animate-scale-in">
                   {cartCount}
                 </span>
               )}
             </Link>
 
-            {/* Account Icon */}
-            <Link
-              to="/account"
-              className="p-2 text-[#252722] hover:text-[#B85C38] transition-colors rounded-full hover:bg-[#E5DED3]/40 hidden sm:flex"
-              aria-label="Customer Account"
-            >
-              <User className="w-5 h-5 stroke-[1.8]" />
-            </Link>
+            {/* Account Profile / Sign In */}
+            {user ? (
+              <Link
+                to="/account"
+                className="px-2.5 py-1.5 text-[#252722] hover:text-[#B85C38] transition-colors rounded-full hover:bg-[#E5DED3]/40 hidden sm:flex items-center gap-2 border border-[#E5DED3]"
+                title={`Signed in as ${user.fullName} (${user.email})`}
+                aria-label="Customer Account Profile"
+              >
+                <div className="w-6 h-6 rounded-full bg-[#244C3A] text-white text-[10px] font-bold flex items-center justify-center shrink-0">
+                  {getInitials(user.fullName)}
+                </div>
+                <span className="text-xs font-semibold text-[#244C3A] hidden md:inline max-w-[80px] truncate">
+                  {user.fullName.split(' ')[0]}
+                </span>
+              </Link>
+            ) : (
+              <Link
+                to="/login"
+                className="p-2 text-[#252722] hover:text-[#B85C38] transition-colors rounded-full hover:bg-[#E5DED3]/40 hidden sm:flex items-center gap-1.5 text-xs font-semibold"
+                aria-label="Sign In"
+                title="Sign In to Shilpa Setu"
+              >
+                <User className="w-5 h-5 stroke-[1.8]" />
+                <span className="hidden md:inline">Sign In</span>
+              </Link>
+            )}
 
             {/* Terracotta "Become an Artisan" Button */}
             <Link
@@ -259,12 +311,12 @@ export const Navbar: React.FC = () => {
                   <div className="flex items-center gap-2.5">
                     <img
                       src={logoImg}
-                      alt="ArtisanAR/VR Logo"
+                      alt="SHILPA SETU Logo"
                       className="w-8 h-8 rounded-full object-cover border border-[#B85C38]/30"
                     />
                     <div className="flex items-baseline">
-                      <span className="font-serif text-xl font-bold text-[#244C3A]">Artisan</span>
-                      <span className="font-sans text-xl font-bold text-[#B85C38] ml-0.5">AR/VR</span>
+                      <span className="font-serif text-xl font-bold text-[#244C3A]">SHILPA</span>
+                      <span className="font-serif text-xl font-bold text-[#B85C38] ml-1">SETU</span>
                     </div>
                   </div>
                   <button
@@ -281,6 +333,23 @@ export const Navbar: React.FC = () => {
                     Craft Discovery
                   </span>
                   <nav className="space-y-1">
+                    {/* Ask SHILPA button in mobile menu */}
+                    <button
+                      onClick={() => {
+                        closeMenu();
+                        openShilpa();
+                      }}
+                      className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-semibold text-[#244C3A] bg-[#FAF8F5] border border-[#B85C38]/40 hover:bg-[#B85C38] hover:text-white transition-all group mb-1.5"
+                    >
+                      <span className="flex items-center gap-2.5">
+                        <div className="w-5 h-5 rounded-full overflow-hidden border border-[#B85C38]/40 shrink-0">
+                          <img src={logoImg} alt="SHILPA" className="w-full h-full object-cover" />
+                        </div>
+                        <span>Ask SHILPA (AI Guide)</span>
+                      </span>
+                      <Sparkles className="w-4 h-4 text-[#B85C38] group-hover:text-white" />
+                    </button>
+
                     <Link
                       to="/"
                       onClick={closeMenu}
@@ -396,20 +465,24 @@ export const Navbar: React.FC = () => {
                   </span>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <Link
-                      to="/cart"
+                      to={isPatronUser ? "/cart" : "/login?redirect=/cart"}
                       onClick={closeMenu}
                       className="p-2.5 bg-white border border-[#E5DED3] rounded-lg hover:border-[#B85C38] flex items-center justify-between"
                     >
                       <span>Shopping Cart</span>
-                      <span className="font-bold text-[#244C3A]">{cartCount}</span>
+                      {isPatronUser && cartCount > 0 && (
+                        <span className="font-bold text-[#244C3A]">{cartCount}</span>
+                      )}
                     </Link>
                     <Link
-                      to="/account/wishlist"
+                      to={isPatronUser ? "/account/wishlist" : "/login?redirect=/account/wishlist"}
                       onClick={closeMenu}
                       className="p-2.5 bg-white border border-[#E5DED3] rounded-lg hover:border-[#B85C38] flex items-center justify-between"
                     >
                       <span>Wishlist</span>
-                      <span className="font-bold text-[#B85C38]">{wishlistCount}</span>
+                      {isPatronUser && wishlistCount > 0 && (
+                        <span className="font-bold text-[#B85C38]">{wishlistCount}</span>
+                      )}
                     </Link>
                     <Link
                       to="/account/orders"
@@ -429,7 +502,7 @@ export const Navbar: React.FC = () => {
                   </span>
                   <div className="space-y-2">
                     <Link
-                      to="/artisan/dashboard"
+                      to="/artisan/login"
                       onClick={closeMenu}
                       className="block p-3 bg-white border border-[#E5DED3] rounded-lg hover:border-[#244C3A] transition-all"
                     >

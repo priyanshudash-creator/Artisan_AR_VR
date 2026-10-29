@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import {
   Heart,
@@ -17,11 +17,15 @@ import {
   Info
 } from 'lucide-react'
 import { MOCK_PRODUCTS, MOCK_ARTISANS } from '../data/mockData'
+import { ODISHA_ARTIFACTS } from '../data/odishaArtifactsData'
+import { artifactToProduct } from '../utils/artifactAdapter'
 import { useCartWishlist } from '../context/CartWishlistContext'
+import { useShilpa } from '../context/ShilpaContext'
 import { VerificationBadge } from '../components/common/VerificationBadge'
 import { PriceBreakdown } from '../components/pricing/PriceBreakdown'
 import { Craft3DViewer } from '../components/showroom/Craft3DViewer'
 import { ProductCard } from '../components/products/ProductCard'
+import logoImg from '../assets/logo.jpg'
 
 export const ProductDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>()
@@ -35,16 +39,39 @@ export const ProductDetailPage: React.FC = () => {
     showToast
   } = useCartWishlist()
 
+  const { openShilpa, setActiveArtifact } = useShilpa()
+
   const [quantity, setQuantity] = useState(1)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [activeTab, setActiveTab] = useState<'details' | '3d-view' | 'process' | 'pricing'>('details')
 
-  const product = MOCK_PRODUCTS.find((p) => p.slug === slug) || MOCK_PRODUCTS[0]
+  const odishaItem = ODISHA_ARTIFACTS.find(
+    (a) => a.id === slug || a.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') === slug
+  )
+  const product =
+    MOCK_PRODUCTS.find((p) => p.slug === slug || p.id === slug) ||
+    (odishaItem ? artifactToProduct(odishaItem) : MOCK_PRODUCTS[0])
   const artisan = MOCK_ARTISANS.find((a) => a.id === product.artisanId) || MOCK_ARTISANS[0]
   const relatedProducts = MOCK_PRODUCTS.filter((p) => p.categoryId === product.categoryId && p.id !== product.id).slice(0, 3)
 
   const wishlisted = isWishlisted(product.id)
   const isCompared = compareList.includes(product.id)
+
+  // Automatically attach active artifact to SHILPA context
+  useEffect(() => {
+    if (product) {
+      setActiveArtifact({
+        id: product.id,
+        slug: product.slug,
+        name: product.name,
+        category: product.categoryId,
+        district: product.district,
+        priceDisplay: `₹${product.price.toLocaleString('en-IN')}`,
+        image: product.images[0],
+        isDetailedBreakdownAvailable: !odishaItem
+      })
+    }
+  }, [product, setActiveArtifact, odishaItem])
 
   const handleShare = () => {
     navigator.clipboard?.writeText(window.location.href)
@@ -347,6 +374,44 @@ export const ProductDetailPage: React.FC = () => {
               </div>
             </div>
 
+            {/* SHILPA AI Craft Guide Context Card */}
+            <div className="p-4 rounded-xl bg-white border border-[#B85C38]/40 shadow-xs flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-full overflow-hidden border border-[#B85C38] shrink-0">
+                  <img src={logoImg} alt="SHILPA" className="w-full h-full object-cover" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <h4 className="font-serif font-bold text-xs sm:text-sm text-[#244C3A]">
+                      Ask SHILPA (AI Craft Guide)
+                    </h4>
+                    <Sparkles className="w-3.5 h-3.5 text-[#B85C38]" />
+                  </div>
+                  <p className="text-[11px] text-[#6B6A63] truncate">
+                    Ask about {product.name}'s materials, making process, or declared price breakdown.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  openShilpa({
+                    id: product.id,
+                    slug: product.slug,
+                    name: product.name,
+                    category: product.categoryId,
+                    district: product.district,
+                    priceDisplay: `₹${product.price.toLocaleString('en-IN')}`,
+                    image: product.images[0],
+                    isDetailedBreakdownAvailable: !odishaItem
+                  })
+                }}
+                className="bg-[#B85C38] hover:bg-[#9E4928] text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition-colors shrink-0 shadow-2xs"
+              >
+                Ask Guide →
+              </button>
+            </div>
+
           </div>
 
         </div>
@@ -405,6 +470,30 @@ export const ProductDetailPage: React.FC = () => {
                   sellingPrice={product.price}
                   productName={product.name}
                 />
+
+                <div className="mt-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 p-3.5 rounded-xl bg-[#FAF8F5] border border-[#B85C38]/30 text-xs">
+                  <div className="flex items-center gap-2 text-[#252722]">
+                    <Sparkles className="w-4 h-4 text-[#B85C38] shrink-0" />
+                    <span>Have questions about how this fair artisan return is calculated?</span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      openShilpa({
+                        id: product.id,
+                        slug: product.slug,
+                        name: product.name,
+                        category: product.categoryId,
+                        district: product.district,
+                        priceDisplay: `₹${product.price.toLocaleString('en-IN')}`,
+                        image: product.images[0],
+                        isDetailedBreakdownAvailable: !odishaItem
+                      });
+                    }}
+                    className="font-bold text-[#B85C38] hover:text-[#9E4928] hover:underline shrink-0"
+                  >
+                    Ask SHILPA to Explain →
+                  </button>
+                </div>
               </div>
 
               {/* Care Instructions & Specs */}

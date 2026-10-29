@@ -14,16 +14,16 @@ export const Footer: React.FC = () => {
             <Link to="/" className="inline-flex items-center gap-3 group">
               <img
                 src={logoImg}
-                alt="ArtisanAR/VR Konark Wheel Logo"
+                alt="SHILPA SETU Konark Wheel Logo"
                 className="w-12 h-12 rounded-full object-cover border border-[#B85C38]/40 shadow-xs group-hover:rotate-12 transition-transform duration-300"
               />
               <div className="flex flex-col">
                 <div className="flex items-baseline">
-                  <span className="font-serif text-2xl font-bold text-[#244C3A]">Artisan</span>
-                  <span className="font-sans text-2xl font-bold text-[#B85C38] ml-0.5">AR/VR</span>
+                  <span className="font-serif text-2xl font-bold text-[#244C3A]">SHILPA</span>
+                  <span className="font-serif text-2xl font-bold text-[#B85C38] ml-1.5">SETU</span>
                 </div>
                 <span className="text-[10px] font-semibold tracking-[0.25em] text-[#6B6A63] uppercase -mt-0.5">
-                  GAON TO GROWTH
+                  ODISHA CRAFTS & HERITAGE
                 </span>
               </div>
             </Link>
@@ -140,7 +140,12 @@ export const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/artisan/dashboard" className="hover:text-[#244C3A] transition-colors">
+                <Link to="/login" className="hover:text-[#B85C38] transition-colors font-medium">
+                  Patron Sign In / Account
+                </Link>
+              </li>
+              <li>
+                <Link to="/artisan/login" className="hover:text-[#244C3A] transition-colors">
                   Artisan Studio Portal
                 </Link>
               </li>
@@ -172,7 +177,7 @@ export const Footer: React.FC = () => {
         {/* Platform Integrity & Copyright */}
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[#6B6A63]">
           <p className="text-center md:text-left">
-            © 2026 <strong>ArtisanAR/VR — Gaon to Growth</strong>. Created with care for Odisha traditional craftsmanship.
+            © 2026 <strong>SHILPA SETU</strong>. Created with care for Odisha traditional craftsmanship.
           </p>
           <div className="flex items-center gap-6 text-[11px]">
             <span>Transparent Pricing</span>

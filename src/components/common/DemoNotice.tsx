@@ -12,7 +12,7 @@ export const DemoNotice: React.FC = () => {
         <div className="flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap">
           <Info className="w-3.5 h-3.5 text-[#E8DCCB] shrink-0" />
           <span className="font-light tracking-wide truncate">
-            <strong className="font-semibold text-white">ArtisanAR/VR — Gaon to Growth:</strong> Connecting rural Odisha master weavers and tribal sculptors directly to conscious buyers with 3D heritage showcases and transparent pricing.
+            <strong className="font-semibold text-white">SHILPA SETU:</strong> Connecting rural Odisha master weavers and tribal sculptors directly to conscious buyers with SHILPA AI Craft Guide, 3D showcases, and transparent pricing.
           </span>
         </div>
         <button

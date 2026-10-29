@@ -17,7 +17,9 @@ import {
 } from 'lucide-react'
 import { OdishaArtifactItem } from '../../data/odishaArtifactsData'
 import { useCartWishlist } from '../../context/CartWishlistContext'
+import { useShilpa } from '../../context/ShilpaContext'
 import { artifactToProduct, getConfidenceBadge } from '../../utils/artifactAdapter'
+import logoImg from '../../assets/logo.jpg'
 
 interface ArtifactDetailModalProps {
   artifact: OdishaArtifactItem | null
@@ -41,6 +43,8 @@ export const ArtifactDetailModal: React.FC<ArtifactDetailModalProps> = ({
     removeFromCompare,
     showToast
   } = useCartWishlist()
+
+  const { openShilpa } = useShilpa()
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -174,6 +178,40 @@ export const ArtifactDetailModal: React.FC<ArtifactDetailModalProps> = ({
                   </p>
                 </div>
               </div>
+
+              {/* SHILPA AI Craft Guide Integration */}
+              <button
+                onClick={() => {
+                  openShilpa({
+                    id: artifact.id,
+                    name: artifact.name,
+                    category: artifact.category,
+                    district: artifact.district,
+                    priceRange: `₹${artifact.priceMin}–₹${artifact.priceMax} ${artifact.priceUnit}`,
+                    image: artifact.image,
+                    isDetailedBreakdownAvailable: false
+                  });
+                }}
+                className="w-full flex items-center justify-between p-3.5 rounded-xl border-2 border-[#B85C38]/40 bg-white hover:bg-[#FAF8F5] transition-all group shadow-xs text-left"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-full overflow-hidden border border-[#B85C38]/40 shadow-xs shrink-0">
+                    <img src={logoImg} alt="SHILPA" className="w-full h-full object-cover" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-[#244C3A] flex items-center gap-1.5">
+                      <span>Ask SHILPA (AI Craft Guide)</span>
+                      <Sparkles className="w-3.5 h-3.5 text-[#B85C38]" />
+                    </span>
+                    <span className="text-[11px] text-[#6B6A63] block">
+                      Ask about materials, making method, or price breakdown
+                    </span>
+                  </div>
+                </div>
+                <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#B85C38] text-white group-hover:bg-[#9E4928] transition-colors shrink-0">
+                  Ask Guide →
+                </span>
+              </button>
 
               {/* Process Video Preview Box */}
               {artifact.processVideoUrl && (

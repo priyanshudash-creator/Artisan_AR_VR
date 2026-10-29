@@ -7,37 +7,26 @@ import {
   Eye,
   EyeOff,
   ArrowRight,
-  Sparkles,
   KeyRound,
   CheckCircle2,
   AlertCircle,
-  Building2,
-  Compass
+  Building2
 } from 'lucide-react'
 import { useCartWishlist } from '../../context/CartWishlistContext'
-import logoImg from '../../assets/logo.jpg'
 
 export const AdminLoginPage: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { showToast } = useCartWishlist()
 
-  // Form states
-  const [email, setEmail] = useState('curator@artisanarvr.gov.in')
-  const [password, setPassword] = useState('Heritage2026@Odisha')
+  // Form states (empty by default so user fills their own credentials)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [twoFactorCode, setTwoFactorCode] = useState('892041')
+  const [twoFactorCode, setTwoFactorCode] = useState('')
   const [rememberMe, setRememberMe] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
-
-  // Quick preset accounts
-  const handleSelectPreset = (presetEmail: string, presetPass: string, roleName: string) => {
-    setEmail(presetEmail)
-    setPassword(presetPass)
-    setErrorMsg('')
-    showToast(`Loaded ${roleName} credentials`)
-  }
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
@@ -88,36 +77,8 @@ export const AdminLoginPage: React.FC = () => {
         }}
       />
 
-      {/* Top Simple Nav */}
-      <header className="relative z-10 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2.5 group">
-          <img
-            src={logoImg}
-            alt="ArtisanAR/VR Logo"
-            className="w-9 h-9 rounded-full object-cover border border-[#B85C38]/40 shadow-xs group-hover:rotate-12 transition-transform duration-300"
-          />
-          <div className="flex flex-col">
-            <div className="flex items-baseline tracking-tight">
-              <span className="font-serif text-2xl font-bold text-[#244C3A]">Artisan</span>
-              <span className="font-sans text-2xl font-bold text-[#B85C38] ml-0.5">AR/VR</span>
-            </div>
-            <span className="text-[9px] font-semibold uppercase tracking-widest text-[#6B6A63] -mt-0.5">
-              GAON TO GROWTH
-            </span>
-          </div>
-        </Link>
-
-        <Link
-          to="/marketplace"
-          className="text-xs font-semibold text-[#244C3A] hover:text-[#B85C38] flex items-center gap-1.5 transition-colors"
-        >
-          <Compass className="w-4 h-4" />
-          <span>Public Marketplace</span>
-        </Link>
-      </header>
-
       {/* Main Login Card Section */}
-      <main className="relative z-10 flex-1 flex items-center justify-center px-4 py-8">
+      <main className="relative z-10 flex-1 flex items-center justify-center px-4 py-12 sm:py-16">
         <div className="w-full max-w-md">
           
           {/* Official Badge & Portal Header */}
@@ -136,56 +97,6 @@ export const AdminLoginPage: React.FC = () => {
 
           {/* Login Card */}
           <div className="bg-white border border-[#E5DED3] rounded-2xl shadow-xl p-6 sm:p-8 backdrop-blur-sm">
-            
-            {/* Quick Demo Fill Presets */}
-            <div className="mb-6 p-3.5 bg-[#FAF8F5] border border-[#E5DED3] rounded-xl">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-bold text-[#244C3A] flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5 text-[#B85C38]" />
-                  <span>Quick-fill Verified Credentials:</span>
-                </span>
-                <span className="text-[10px] text-[#6B6A63]">Select role</span>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleSelectPreset(
-                      'curator@artisanarvr.gov.in',
-                      'Heritage2026@Odisha',
-                      'State Heritage Curator'
-                    )
-                  }
-                  className={`text-left p-2 rounded-lg border text-[11px] transition-all cursor-pointer ${
-                    email === 'curator@artisanarvr.gov.in'
-                      ? 'border-[#B85C38] bg-white shadow-xs font-semibold text-[#B85C38]'
-                      : 'border-[#E5DED3] bg-white hover:border-[#244C3A] text-[#252722]'
-                  }`}
-                >
-                  <strong className="block text-[11px] text-[#244C3A]">State Curator</strong>
-                  <span className="text-[10px] text-[#6B6A63] block truncate">curator@artisanarvr.gov.in</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleSelectPreset(
-                      'audit.officer@gaontogrowth.org',
-                      'AuditOdishaCrafts#1',
-                      'Senior Provenance Auditor'
-                    )
-                  }
-                  className={`text-left p-2 rounded-lg border text-[11px] transition-all cursor-pointer ${
-                    email === 'audit.officer@gaontogrowth.org'
-                      ? 'border-[#B85C38] bg-white shadow-xs font-semibold text-[#B85C38]'
-                      : 'border-[#E5DED3] bg-white hover:border-[#244C3A] text-[#252722]'
-                  }`}
-                >
-                  <strong className="block text-[11px] text-[#244C3A]">Craft Auditor</strong>
-                  <span className="text-[10px] text-[#6B6A63] block truncate">audit.officer@gaontogrowth.org</span>
-                </button>
-              </div>
-            </div>
 
             {/* Error Message */}
             {errorMsg && (
@@ -319,7 +230,7 @@ export const AdminLoginPage: React.FC = () => {
 
           {/* Alternate Navigation */}
           <div className="text-center mt-6 text-xs text-[#6B6A63] space-x-4">
-            <Link to="/artisan/dashboard" className="hover:text-[#244C3A] underline">
+            <Link to="/artisan/login" className="hover:text-[#244C3A] underline">
               Artisan Studio Portal
             </Link>
             <span>•</span>

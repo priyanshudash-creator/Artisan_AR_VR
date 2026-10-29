@@ -649,16 +649,24 @@ export const MarketplacePage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="flex flex-col lg:flex-row gap-8 items-start">
           
-          {/* Desktop Filter Sidebar */}
-          <aside className="hidden lg:block w-72 shrink-0 bg-white border border-[#E5DED3] rounded-3xl p-6 shadow-xs sticky top-28">
-            <div className="flex items-center justify-between pb-4 border-b border-[#E5DED3] mb-4">
+          {/* Desktop Filter Sidebar with Independent Smooth Scroll & Sticky Pinning */}
+          <aside className="hidden lg:block w-72 shrink-0 bg-white border border-[#E5DED3] rounded-3xl p-5 shadow-xs sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto overscroll-contain scrollbar-thin">
+            <div className="sticky -top-5 -mt-5 -mx-5 px-5 pt-5 pb-3 bg-white/95 backdrop-blur-xs z-10 flex items-center justify-between border-b border-[#E5DED3] mb-4 rounded-t-3xl">
               <span className="font-serif text-base font-bold text-[#244C3A] flex items-center gap-2">
                 <Filter className="w-4 h-4 text-[#B85C38]" /> Filters
               </span>
               {activeFilterCount > 0 && (
-                <span className="text-xs bg-[#B85C38] text-white px-2 py-0.5 rounded-full font-medium">
-                  {activeFilterCount}
-                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={clearAllFilters}
+                    className="text-[11px] text-[#B85C38] hover:underline font-semibold"
+                  >
+                    Reset
+                  </button>
+                  <span className="text-xs bg-[#B85C38] text-white px-2 py-0.5 rounded-full font-medium">
+                    {activeFilterCount}
+                  </span>
+                </div>
               )}
             </div>
             <FilterContent />

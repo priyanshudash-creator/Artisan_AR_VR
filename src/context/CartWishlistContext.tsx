@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
 import { Product, CartItem } from '../types'
 import { MOCK_PRODUCTS } from '../data/mockData'
+import { getUserSession, UserProfile } from '../utils/userAuth'
 
 interface CartWishlistContextType {
   cart: CartItem[]
@@ -23,32 +24,56 @@ interface CartWishlistContextType {
   compareCount: number
   toastMessage: string | null
   showToast: (msg: string) => void
+  currentUser: UserProfile | null
 }
 
 const CartWishlistContext = createContext<CartWishlistContextType | undefined>(undefined)
 
+const getSafeUserKey = (prefix: string, user: UserProfile | null) => {
+  if (user && user.email) {
+    const safe = user.email.toLowerCase().replace(/[^a-z0-9]/g, '_')
+    return `${prefix}_user_${safe}`
+  }
+  return `${prefix}_guest`
+}
+
 export const CartWishlistProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => getUserSession())
+  const activeUserRef = useRef<UserProfile | null>(currentUser)
+  activeUserRef.current = currentUser
+
+  // Initial cart loader
   const [cart, setCart] = useState<CartItem[]>(() => {
+    const user = getUserSession()
+    if (!user || !user.isLoggedIn) return []
+    const userKey = getSafeUserKey('artisan_cart', user)
     try {
-      const saved = localStorage.getItem('artisan_cart')
-      if (saved) return JSON.parse(saved)
+      const savedUser = localStorage.getItem(userKey)
+      if (savedUser) return JSON.parse(savedUser)
+      // fallback to legacy if user just signed in
+      const legacy = localStorage.getItem('artisan_cart')
+      if (legacy) return JSON.parse(legacy)
     } catch {
       // fallback
     }
-    // Initial demo cart item
-    return [
-      { product: MOCK_PRODUCTS[0], quantity: 1 }
-    ]
+    return []
   })
 
+  // Initial wishlist loader
   const [wishlist, setWishlist] = useState<string[]>(() => {
+    const user = getUserSession()
+    if (!user || !user.isLoggedIn) return []
+    const userKey = getSafeUserKey('artisan_wishlist', user)
     try {
-      const saved = localStorage.getItem('artisan_wishlist')
-      if (saved) return JSON.parse(saved)
+      const savedUser = localStorage.getItem(userKey)
+      if (savedUser) return JSON.parse(savedUser)
+      // fallback to legacy if user just signed in
+      const legacy = localStorage.getItem('artisan_wishlist')
+      if (legacy) return JSON.parse(legacy)
     } catch {
       // fallback
     }
-    return ['prod-002', 'prod-004']
+    return []
   })
 
   const [compareList, setCompareList] = useState<string[]>(() => {
@@ -63,22 +88,70 @@ export const CartWishlistProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const [toastMessage, setToastMessage] = useState<string | null>(null)
 
+  // Listen to auth changes (Sign In / Sign Out / Switch user)
   useEffect(() => {
-    try {
-      localStorage.setItem('artisan_cart', JSON.stringify(cart))
-    } catch {
-      // ignore
-    }
-  }, [cart])
+    const handleAuthChange = () => {
+      const newUser = getUserSession()
+      setCurrentUser(newUser)
 
+      if (newUser && newUser.isLoggedIn) {
+        // Load this specific user's cart and wishlist
+        const cartKey = getSafeUserKey('artisan_cart', newUser)
+        const wishlistKey = getSafeUserKey('artisan_wishlist', newUser)
+
+        let loadedCart: CartItem[] = []
+        let loadedWishlist: string[] = []
+
+        try {
+          const savedCart = localStorage.getItem(cartKey) || localStorage.getItem('artisan_cart')
+          if (savedCart) loadedCart = JSON.parse(savedCart)
+
+          const savedWishlist = localStorage.getItem(wishlistKey) || localStorage.getItem('artisan_wishlist')
+          if (savedWishlist) loadedWishlist = JSON.parse(savedWishlist)
+        } catch (e) {
+          console.error('Failed to load user cart/wishlist', e)
+        }
+
+        setCart(loadedCart)
+        setWishlist(loadedWishlist)
+      } else {
+        // User signed out -> reset counts to 0
+        setCart([])
+        setWishlist([])
+      }
+    }
+
+    window.addEventListener('shilpa_auth_change', handleAuthChange)
+    return () => window.removeEventListener('shilpa_auth_change', handleAuthChange)
+  }, [])
+
+  // Persist cart
   useEffect(() => {
-    try {
-      localStorage.setItem('artisan_wishlist', JSON.stringify(wishlist))
-    } catch {
-      // ignore
+    if (currentUser && currentUser.isLoggedIn) {
+      const key = getSafeUserKey('artisan_cart', currentUser)
+      try {
+        localStorage.setItem(key, JSON.stringify(cart))
+        localStorage.setItem('artisan_cart', JSON.stringify(cart))
+      } catch {
+        // ignore
+      }
     }
-  }, [wishlist])
+  }, [cart, currentUser])
 
+  // Persist wishlist
+  useEffect(() => {
+    if (currentUser && currentUser.isLoggedIn) {
+      const key = getSafeUserKey('artisan_wishlist', currentUser)
+      try {
+        localStorage.setItem(key, JSON.stringify(wishlist))
+        localStorage.setItem('artisan_wishlist', JSON.stringify(wishlist))
+      } catch {
+        // ignore
+      }
+    }
+  }, [wishlist, currentUser])
+
+  // Persist compare
   useEffect(() => {
     try {
       localStorage.setItem('artisan_compare', JSON.stringify(compareList))
@@ -95,6 +168,11 @@ export const CartWishlistProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }
 
   const addToCart = (product: Product, quantity = 1) => {
+    if (!currentUser || !currentUser.isLoggedIn) {
+      showToast('Please sign in to your patron account to add items to your cart.')
+      return
+    }
+
     setCart((prev) => {
       const existing = prev.find((item) => item.product.id === product.id)
       if (existing) {
@@ -128,9 +206,18 @@ export const CartWishlistProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const clearCart = () => {
     setCart([])
+    if (currentUser && currentUser.isLoggedIn) {
+      const key = getSafeUserKey('artisan_cart', currentUser)
+      localStorage.removeItem(key)
+    }
   }
 
   const toggleWishlist = (productId: string) => {
+    if (!currentUser || !currentUser.isLoggedIn) {
+      showToast('Please sign in to your patron account to save items to your wishlist.')
+      return
+    }
+
     setWishlist((prev) => {
       const exists = prev.includes(productId)
       const next = exists ? prev.filter((id) => id !== productId) : [...prev, productId]
@@ -170,8 +257,11 @@ export const CartWishlistProvider: React.FC<{ children: React.ReactNode }> = ({ 
   )
   const cartShipping = cartSubtotal > 1500 || cartSubtotal === 0 ? 0 : 150
   const cartTotal = cartSubtotal + cartShipping
-  const cartCount = cart.reduce((count, item) => count + item.quantity, 0)
-  const wishlistCount = wishlist.length
+
+  // Strictly user-specific counts: 0 when not signed in as a patron
+  const isPatron = Boolean(currentUser && currentUser.isLoggedIn)
+  const cartCount = isPatron ? cart.reduce((count, item) => count + item.quantity, 0) : 0
+  const wishlistCount = isPatron ? wishlist.length : 0
   const compareCount = compareList.length
 
   return (
@@ -196,7 +286,8 @@ export const CartWishlistProvider: React.FC<{ children: React.ReactNode }> = ({ 
         wishlistCount,
         compareCount,
         toastMessage,
-        showToast
+        showToast,
+        currentUser
       }}
     >
       {children}
